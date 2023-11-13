@@ -1,0 +1,8 @@
+# Authenticate with Azure CLI
+az login
+
+# Install ansible-cmdb
+pip install ansible-cmdb
+
+# Deploy and configure Windows VM
+ansible-playbook azure_winvm.yml -e @vars.yml --ask-vault-pass
