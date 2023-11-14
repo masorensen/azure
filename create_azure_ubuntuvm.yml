@@ -68,9 +68,9 @@
           key_data: "{{ lookup('file', '/tmp/id_ssh_rsa.pub') }}"
       network_interfaces: nic_ubuntu
       image:
-        offer: 0001-com-ubuntu-server-focal
-        publisher: canonical
-        sku: 20_04-lts-gen2
+        offer: 0001-com-ubuntu-server-jammy
+        publisher: Canonical
+        sku: 22_04-lts-gen2
         version: latest
     no_log: true
 
