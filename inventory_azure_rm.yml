@@ -1,7 +1,5 @@
 plugin: azure.azcollection.azure_rm
 auth_source: auto
-include_vm_resource_groups:
-  - rg-ansible-demo
 conditional_groups:
   linux: "'ubuntu' in image.offer"
   windows: "'WindowsServer' in image.offer"
