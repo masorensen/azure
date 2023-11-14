@@ -23,6 +23,8 @@ With the vault created, you can use the examples commands below to play with Ans
 `ansible-playbook create_azure_ubuntuvm.yml -e @vars.yml --ask-vault-pass`
 
 ### Test login to Ubuntu VM
+`ansible-playbook -i inventory_azure_rm.yml test_azure_ubuntuvm.yml -e @vars.yml --ask-vault-pass`
+
 `ssh azureadmin@<publicipaddress> -i /tmp/id_ssh_rsa`
 
 ### Install apt packages on Ubuntu VM
@@ -39,6 +41,8 @@ With the vault created, you can use the examples commands below to play with Ans
 `ansible-cmdb -t sql -f out/ > cmdb.sql`
 
 ### Cleanup & destroy resources
+`rm cmdb.*`
+
 `ansible-playbook cleanup_resources.yml -e @vars.yml --ask-vault-pass`
 
 ## Additional learning resources
@@ -48,3 +52,5 @@ With the vault created, you can use the examples commands below to play with Ans
   * https://www.youtube.com/playlist?list=PL2_OBreMn7FqZkvMYt6ATmgC0KAGGJNAN
 * Azure Ansible Collection Documentation
   * https://docs.ansible.com/ansible/latest/collections/azure/azcollection/index.html
+* Ansible-CMDB Documentation
+  * https://ansible-cmdb.readthedocs.io/en/latest/usage/
