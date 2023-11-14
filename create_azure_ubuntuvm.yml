@@ -4,12 +4,13 @@
   tasks:
   - name: Create tmp directory
     ansible.builtin.file:
-      path: tmp
+      path: /tmp
       state: directory
 
   - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
     community.crypto.openssh_keypair:
-      path: tmp/id_ssh_rsa
+      path: /tmp/id_ssh_rsa
+      force: true
 
   - name: Create resource group
     azure_rm_resourcegroup:
@@ -64,7 +65,7 @@
       ssh_password_enabled: false
       ssh_public_keys:
         - path: /home/azureadmin/.ssh/authorized_keys
-          key_data: "{{ lookup('file', 'tmp/id_ssh_rsa.pub') }}"
+          key_data: "{{ lookup('file', '/tmp/id_ssh_rsa.pub') }}"
       network_interfaces: nic_ubuntu
       image:
         offer: 0001-com-ubuntu-server-focal
