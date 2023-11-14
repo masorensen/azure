@@ -1,0 +1,11 @@
+- hosts: localhost
+  tasks:
+  - name: Deleting resource group
+    azure_rm_resourcegroup:
+      name: "{{ azure_resource_group_name }}"
+      force_delete_nonempty: true
+      state: absent
+    register: rg_deletion_results
+  - name: Display output
+    ansible.builtin.debug:
+      var: rg_deletion_results

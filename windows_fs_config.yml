@@ -1,0 +1,16 @@
+- name: Install Windows File Server features
+  hosts: windows
+  vars:
+    ansible_user: azureadmin
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+    ansible_password: "{{ win_admin_password }}"
+  tasks:
+  - name: Install File Server features
+    ansible.windows.win_feature:
+      name:
+        - FS-FileServer
+        - FS-DFS-Namespace
+        - RSAT-File-Services
+        - RSAT-DFS-Mgmt-Con
+      state: present

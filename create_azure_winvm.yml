@@ -1,0 +1,88 @@
+- name: Create Azure VM (Windows)
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{ azure_resource_group_name }}"
+      location: centralus
+
+  - name: Create virtual network
+    azure_rm_virtualnetwork:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: vnet-ansible-demo
+      address_prefixes: "172.16.0.0/16"
+
+  - name: Add subnet
+    azure_rm_subnet:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: snet-ansible-demo
+      address_prefix: "172.16.1.0/24"
+      virtual_network: vnet-ansible-demo
+
+  - name: Create Network Security Group
+    azure_rm_securitygroup:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: nsg-ansible-demo-win
+      rules:
+        - name: 'WinRM'
+          protocol: Tcp
+          destination_port_range: 
+            - 5986
+          access: Allow
+          priority: 1012
+          direction: Inbound
+
+  - name: Create a network interface
+    azure_rm_networkinterface:
+      name: nic_win
+      resource_group: "{{ azure_resource_group_name }}"
+      virtual_network: vnet-ansible-demo
+      subnet_name: snet-ansible-demo
+      security_group: nsg-ansible-demo-win
+      ip_configurations:
+        - name: default
+          public_ip_address_name: pip_win
+          primary: True
+
+  - name: Create VM
+    azure_rm_virtualmachine:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: ansible-win-vm
+      vm_size: Standard_DS1_v2
+      admin_username: azureadmin
+      admin_password: "{{ win_admin_password }}"
+      network_interfaces: nic_win
+      os_type: Windows
+      image:
+        offer: WindowsServer
+        publisher: MicrosoftWindowsServer
+        sku: 2019-Datacenter
+        version: latest
+    no_log: true
+
+  - name: Bootstrap Windows VM for Ansible management
+    azure_rm_virtualmachineextension:
+      name: winrm-extension
+      resource_group: "{{ azure_resource_group_name }}"
+      virtual_machine_name: ansible-win-vm
+      publisher: Microsoft.Compute
+      virtual_machine_extension_type: CustomScriptExtension
+      type_handler_version: "1.9"
+      settings: '{"fileUris": ["https://raw.githubusercontent.com/masorensen/azure-ansible-demo/main/ConfigureRemotingForAnsible.ps1"],"commandToExecute": "powershell -ExecutionPolicy Unrestricted -File ConfigureRemotingForAnsible.ps1"}'
+      auto_upgrade_minor_version: true
+
+  - name: Get facts for public ip
+    azure_rm_publicipaddress_info:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: pip_win
+    register: publicipaddresses
+
+  - name: set public ip address fact
+    set_fact: publicipaddress="{{ publicipaddresses | json_query('publicipaddresses[0].ip_address')}}"
+
+  - name: wait for WinRM to come online
+    wait_for:
+      port: 5986
+      host: "{{ publicipaddress }}"
+      timeout: 600

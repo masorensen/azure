@@ -1,0 +1,93 @@
+- name: Create Azure VM (Ubuntu)
+  hosts: localhost
+  connection: local
+  tasks:
+  - name: Create tmp directory
+    ansible.builtin.file:
+      path: tmp
+      state: directory
+
+  - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+    community.crypto.openssh_keypair:
+      path: tmp/id_ssh_rsa
+
+  - name: Create resource group
+    azure_rm_resourcegroup:
+      name: "{{ azure_resource_group_name }}"
+      location: centralus
+
+  - name: Create virtual network
+    azure_rm_virtualnetwork:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: vnet-ansible-demo
+      address_prefixes: "172.16.0.0/16"
+
+  - name: Add subnet
+    azure_rm_subnet:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: snet-ansible-demo
+      address_prefix: "172.16.1.0/24"
+      virtual_network: vnet-ansible-demo
+
+  - name: Create Network Security Group
+    azure_rm_securitygroup:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: nsg-ansible-demo-ubuntu
+      rules:
+        - name: 'SSH'
+          protocol: Tcp
+          destination_port_range: 
+            - 22
+          access: Allow
+          priority: 1011
+          direction: Inbound
+
+  - name: Create a network interface
+    azure_rm_networkinterface:
+      name: nic_ubuntu
+      resource_group: "{{ azure_resource_group_name }}"
+      virtual_network: vnet-ansible-demo
+      subnet_name: snet-ansible-demo
+      security_group: nsg-ansible-demo-ubuntu
+      ip_configurations:
+        - name: default
+          public_ip_address_name: pip_ubuntu
+          primary: True
+
+  - name: Create Ubuntu VM
+    azure_rm_virtualmachine:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: ansible-ubuntu-vm
+      vm_size: Standard_DS1_v2
+      managed_disk_type: Standard_LRS
+      admin_username: azureadmin
+      ssh_password_enabled: false
+      ssh_public_keys:
+        - path: /home/azureadmin/.ssh/authorized_keys
+          key_data: "{{ lookup('file', 'tmp/id_ssh_rsa.pub') }}"
+      network_interfaces: nic_ubuntu
+      image:
+        offer: 0001-com-ubuntu-server-focal
+        publisher: canonical
+        sku: 20_04-lts-gen2
+        version: latest
+    no_log: true
+
+  - name: Get facts for public ip
+    azure_rm_publicipaddress_info:
+      resource_group: "{{ azure_resource_group_name }}"
+      name: pip_ubuntu
+    register: publicipaddresses
+
+  - name: set public ip address fact
+    set_fact: publicipaddress="{{ publicipaddresses | json_query('publicipaddresses[0].ip_address')}}"
+
+  - name: Wait for ssh to come online
+    wait_for:
+      port: 22
+      host: "{{ publicipaddress }}"
+      timeout: 600
+
+  - name: Print public IP
+    debug:
+      var: publicipaddress

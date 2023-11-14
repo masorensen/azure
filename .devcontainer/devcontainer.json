@@ -1,4 +1,5 @@
 {
+	// This is a modified version of the Azure Ansible (Community) devcontainer that automates the pip update & module installation through postCreateCommand
 	"name": "Azure Ansible (Community)",
 	"build": {
 		"dockerfile": "Dockerfile"
@@ -22,13 +23,6 @@
 			]
 		}
 	},
-	"features": {
-		"terraform": {
-			"version": "latest",
-			"tflint": "latest",
-			"terragrunt": "latest"
-		}
-	},
-	"postCreateCommand": "python3 -m pip install --upgrade pip && ansible-galaxy collection install azure.azcollection --force && pip3 install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt",
+	"postCreateCommand": "python3 -m pip install --upgrade pip && pip install pywinrm ansible-cmdb && ansible-galaxy collection install azure.azcollection --force && pip3 install -r ~/.ansible/collections/ansible_collections/azure/azcollection/requirements-azure.txt && sudo ln -s /usr/bin/python3 /usr/bin/python",
 	"remoteUser": "vscode"
 }

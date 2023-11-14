@@ -1,0 +1,10 @@
+- name: Test connection to Windows VM in Azure
+  hosts: windows
+  vars:
+    ansible_user: azureadmin
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+    ansible_password: "{{ win_admin_password }}"
+  tasks:
+  - name: Test connection
+    win_ping:
