@@ -10,13 +10,10 @@ With the vault created, you can use the examples commands below to play with Ans
 ### Authenticate with Azure CLI
 `az login`
 
-### Install ansible-cmdb
-`pip install ansible-cmdb`
-
 ### Deploy and configure Windows VM
 `ansible-playbook create_azure_winvm.yml -e @vars.yml --ask-vault-pass`
 
-### Test connection to Windows VM
+### Test connection to Windows VM (confirms that Ansible can manage this VM)
 `ansible-playbook -i inventory_azure_rm.yml test_azure_winvm.yml -e @vars.yml --ask-vault-pass`
 
 ### Install Windows File Server features
@@ -26,7 +23,7 @@ With the vault created, you can use the examples commands below to play with Ans
 `ansible-playbook create_azure_ubuntuvm.yml -e @vars.yml --ask-vault-pass`
 
 ### Test login to Ubuntu VM
-`ssh azureadmin@<publicipaddress> -i tmp/id_ssh_rsa`
+`ssh azureadmin@<publicipaddress> -i /tmp/id_ssh_rsa`
 
 ### Install apt packages on Ubuntu VM
 `ansible-playbook -i inventory_azure_rm.yml apt_package_install.yml -e @vars.yml --ask-vault-pass`
@@ -36,7 +33,9 @@ With the vault created, you can use the examples commands below to play with Ans
 
 ### Generate CMDB in different formats
 `ansible-cmdb -f out/ > cmdb.html`
+
 `ansible-cmdb -t markdown -f out/ > cmdb.md`
+
 `ansible-cmdb -t sql -f out/ > cmdb.sql`
 
 ### Cleanup & destroy resources
