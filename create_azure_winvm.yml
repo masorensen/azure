@@ -50,6 +50,7 @@
       resource_group: "{{ azure_resource_group_name }}"
       name: ansible-win-vm
       vm_size: Standard_DS1_v2
+      managed_disk_type: Standard_LRS
       admin_username: azureadmin
       admin_password: "{{ win_admin_password }}"
       network_interfaces: nic_win
