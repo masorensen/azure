@@ -2,7 +2,7 @@
 
 To use this example repo, clone it and build the devcontainer defined in the repository
 
-Once the devcontainer build completes, create an ansible vault (`ansible-vault create vars.yml`) with the following variables defined:
+Once the devcontainer build completes, create an ansible vault (`EDITOR=nano ansible-vault create vars.yml`) with the following variables defined:
 * `win_admin_password`
 * `azure_resource_group_name`
 
@@ -22,7 +22,7 @@ With the vault created, you can use the examples commands below to play with Ans
 ### Deploy and configure Ubuntu VM
 `ansible-playbook create_azure_ubuntuvm.yml -e @vars.yml --ask-vault-pass`
 
-### Test login to Ubuntu VM
+### Test login to Ubuntu VM (confirms that Ansible can manage this VM)
 `ansible-playbook -i inventory_azure_rm.yml test_azure_ubuntuvm.yml -e @vars.yml --ask-vault-pass`
 
 `ssh azureadmin@<publicipaddress> -i /tmp/id_ssh_rsa`
